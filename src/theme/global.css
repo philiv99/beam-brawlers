@@ -1,0 +1,130 @@
+/* LinkittyDo Global Styles for Beam Brawlers */
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  /* Core LinkittyDo palette */
+  --ld-cream: #FDEC92;
+  --ld-mint: #A9EAD2;
+  --ld-ink: #161813;
+  --ld-pop: #FB2B57;
+  --ld-paper: #EEEDE5;
+
+  /* Extended palette for wrestling theme */
+  --bb-gold: #FFD700;
+  --bb-blue: #4A90D9;
+  --bb-red: #E74C3C;
+  --bb-warning: #F39C12;
+
+  /* Muted supports */
+  --ld-muted-olive: #5E6554;
+  --ld-muted-gold: #A29A61;
+  --ld-muted-peach: #E7A790;
+
+  /* Typography */
+  --font-headline: 'Bungee', cursive;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-sm: 2px 2px 0px rgba(22, 24, 19, 0.2);
+  --shadow-md: 4px 4px 0px rgba(22, 24, 19, 0.25);
+  --shadow-lg: 6px 6px 0px rgba(22, 24, 19, 0.3);
+  --shadow-pop: 4px 4px 0px var(--ld-ink);
+
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 250ms ease-out;
+  --transition-slow: 400ms ease-out;
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(135deg, var(--ld-cream) 0%, var(--ld-mint) 100%);
+  color: var(--ld-ink);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+  letter-spacing: 0.02em;
+}
+
+/* Focus states for accessibility */
+:focus-visible {
+  outline: 3px solid var(--ld-pop);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Selection */
+::selection {
+  background: var(--ld-pop);
+  color: var(--ld-paper);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ld-paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ld-ink);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ld-muted-olive);
+}

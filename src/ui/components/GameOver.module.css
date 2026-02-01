@@ -1,0 +1,156 @@
+/* Game Over Screen Styles */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(22, 24, 19, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--ld-paper);
+  border: 4px solid var(--ld-ink);
+  border-radius: var(--radius-xl);
+  box-shadow: 8px 8px 0px var(--ld-ink);
+  padding: var(--space-2xl);
+  text-align: center;
+  min-width: 400px;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.win {
+  border-color: var(--bb-gold);
+  box-shadow: 8px 8px 0px var(--bb-gold);
+}
+
+.lose {
+  border-color: var(--bb-red);
+}
+
+.draw {
+  border-color: var(--ld-muted-olive);
+}
+
+.title {
+  font-family: var(--font-headline);
+  font-size: 48px;
+  margin-bottom: var(--space-sm);
+}
+
+.win .title {
+  color: var(--bb-gold);
+  text-shadow: 3px 3px 0px var(--ld-ink);
+}
+
+.lose .title {
+  color: var(--bb-red);
+}
+
+.draw .title {
+  color: var(--ld-muted-olive);
+}
+
+.subtitle {
+  font-size: 20px;
+  color: var(--ld-muted-olive);
+  margin-bottom: var(--space-xl);
+}
+
+.scores {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.scoreBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--ld-cream);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 3px solid var(--ld-ink);
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ld-muted-olive);
+  text-transform: uppercase;
+}
+
+.score {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  color: var(--ld-ink);
+}
+
+.vs {
+  font-family: var(--font-headline);
+  font-size: 24px;
+  color: var(--ld-pop);
+}
+
+.duration {
+  font-size: 16px;
+  color: var(--ld-muted-olive);
+  margin-bottom: var(--space-xl);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .modal {
+    min-width: auto;
+    width: 90%;
+    padding: var(--space-lg);
+  }
+  
+  .title {
+    font-size: 36px;
+  }
+  
+  .scores {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .vs {
+    display: none;
+  }
+}

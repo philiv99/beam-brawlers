@@ -1,0 +1,65 @@
+/* Button Component Styles */
+
+.button {
+  font-family: var(--font-body);
+  font-weight: 700;
+  border: 3px solid var(--ld-ink);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-pop);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--ld-ink);
+}
+
+.button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--ld-ink);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--ld-pop);
+  outline-offset: 2px;
+}
+
+/* Variants */
+.primary {
+  background: var(--ld-pop);
+  color: var(--ld-paper);
+}
+
+.secondary {
+  background: var(--ld-paper);
+  color: var(--ld-ink);
+}
+
+.danger {
+  background: var(--bb-red);
+  color: var(--ld-paper);
+}
+
+/* Sizes */
+.small {
+  padding: var(--space-xs) var(--space-md);
+  font-size: 14px;
+}
+
+.medium {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 18px;
+}
+
+.large {
+  padding: var(--space-md) var(--space-xl);
+  font-size: 24px;
+}

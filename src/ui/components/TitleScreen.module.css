@@ -1,0 +1,122 @@
+/* Title Screen Styles */
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--ld-cream) 0%, var(--ld-mint) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background decorations */
+.container::before,
+.container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--ld-ink);
+  opacity: 0.1;
+}
+
+.container::before {
+  width: 200px;
+  height: 200px;
+  top: -50px;
+  left: -50px;
+}
+
+.container::after {
+  width: 150px;
+  height: 150px;
+  bottom: -30px;
+  right: -30px;
+}
+
+.content {
+  text-align: center;
+  z-index: 1;
+}
+
+.title {
+  font-family: var(--font-headline);
+  font-size: 72px;
+  color: var(--ld-ink);
+  text-shadow: 6px 6px 0px var(--ld-pop);
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.05em;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 24px;
+  color: var(--ld-muted-olive);
+  margin-bottom: var(--space-xl);
+}
+
+/* Beam preview animation */
+.beamPreview {
+  margin: var(--space-xl) auto;
+  width: 400px;
+  position: relative;
+}
+
+.beam {
+  height: 20px;
+  background: linear-gradient(to bottom, #D4A574, #B8845B);
+  border: 3px solid var(--ld-ink);
+  border-radius: 4px;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.fighter {
+  position: absolute;
+  font-size: 32px;
+  top: -40px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.fighter:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+  margin-top: var(--space-xl);
+}
+
+.footer {
+  margin-top: var(--space-2xl);
+  font-size: 14px;
+  color: var(--ld-muted-olive);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .title {
+    font-size: 48px;
+  }
+  
+  .subtitle {
+    font-size: 18px;
+  }
+  
+  .beamPreview {
+    width: 280px;
+  }
+}

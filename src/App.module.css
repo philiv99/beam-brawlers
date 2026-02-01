@@ -1,0 +1,53 @@
+/* Main App Styles */
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.canvas {
+  border: 4px solid var(--ld-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  background: var(--ld-cream);
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+.pauseOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(22, 24, 19, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.pauseText {
+  font-family: var(--font-headline);
+  font-size: 72px;
+  color: var(--ld-cream);
+  text-shadow: 4px 4px 0px var(--ld-pop);
+  margin-bottom: var(--space-md);
+}
+
+.pauseOverlay p {
+  color: var(--ld-paper);
+  font-size: 18px;
+}
