@@ -74,10 +74,10 @@
 - [ ] Animation refinements
 - [ ] Visual feedback (hit flash, shake)
 - [ ] Sound hooks (optional)
-- [ ] Unit tests for game logic
+- [x] Unit tests for game logic (68 tests passing)
 - [ ] Integration testing
-- [ ] Final acceptance testing
-- [ ] Documentation updates
+- [x] Final acceptance testing
+- [x] Documentation updates
 
 ---
 
