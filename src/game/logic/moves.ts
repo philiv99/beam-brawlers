@@ -302,6 +302,11 @@ export function executeMove(
       );
     case 'guillotine':
       return executeGuillotine(attacker, defender, currentTime, wasCountered);
+    default: {
+      // Exhaustive check
+      const _exhaustiveCheck: never = move;
+      throw new Error(`Unknown move type: ${_exhaustiveCheck}`);
+    }
   }
 }
 

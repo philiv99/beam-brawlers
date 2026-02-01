@@ -13,8 +13,8 @@ export function createInputState(): InputState {
   return {
     moveLeft: false,
     moveRight: false,
-    balanceUp: false,
-    balanceDown: false,
+    jump: false,
+    crouch: false,
     grapple: false,
     pancake: false,
     scissors: false,
@@ -40,8 +40,8 @@ export class InputManager {
     this.keyMap = new Map([
       [KEY_BINDINGS.moveLeft, 'moveLeft'],
       [KEY_BINDINGS.moveRight, 'moveRight'],
-      [KEY_BINDINGS.balanceUp, 'balanceUp'],
-      [KEY_BINDINGS.balanceDown, 'balanceDown'],
+      [KEY_BINDINGS.jump, 'jump'],
+      [KEY_BINDINGS.crouch, 'crouch'],
       [KEY_BINDINGS.grapple, 'grapple'],
       [KEY_BINDINGS.pancake, 'pancake'],
       [KEY_BINDINGS.scissors, 'scissors'],

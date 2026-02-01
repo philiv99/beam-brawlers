@@ -17,9 +17,16 @@ Fight for beam control, execute high-risk wrestling holds while balancing, rack 
 | Key | Action |
 |-----|--------|
 | **A / D** | Move Left / Right |
-| **W / S** | Balance Adjustment |
+| **W** | Jump |
 | **SPACE** | Grapple (when close) |
 | **SHIFT** | Defend / Brace |
+
+### Jump Moves
+
+| Action | Points | Description |
+|--------|--------|-------------|
+| **Stomp** | +175 | Land on opponent to stun them |
+| **Jump Over** | +50 | Jump over opponent for bonus |
 
 ### Wrestling Moves (while grappling)
 

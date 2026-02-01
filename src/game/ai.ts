@@ -8,9 +8,11 @@ import {
   LOW_BALANCE_THRESHOLD,
   AI_UPDATE_RATE,
   MOVE_REQUIREMENTS,
+  JUMP_STAMINA_COST,
+  FIGHTER_WIDTH,
 } from '../game/constants';
 import type { Fighter, AIDecision, MoveType, GameState } from '../game/types';
-import { getFighterDistance, canAct, canBePinned, isNearEdge, areInGrappleRange } from '../game/logic';
+import { getFighterDistance, canAct, canBePinned, isNearEdge, areInGrappleRange, canJump, isInAir } from '../game/logic';
 
 /**
  * AI decision-making class
@@ -32,8 +34,8 @@ export class AIController {
     const ai = state.opponent;
     const player = state.player;
     
-    // Can't act if in certain states
-    if (!canAct(ai)) {
+    // Can't act if in certain states or in air
+    if (!canAct(ai) || isInAir(ai)) {
       return { action: 'idle' };
     }
     
@@ -58,14 +60,20 @@ export class AIController {
       return this.currentDecision;
     }
     
-    // Priority 4: Attempt grapple if close enough
+    // Priority 4: Jump to avoid player's stomp or to attack
+    if (this.shouldJump(ai, player)) {
+      this.currentDecision = { action: 'jump' };
+      return this.currentDecision;
+    }
+    
+    // Priority 5: Attempt grapple if close enough and both grounded
     const distance = getFighterDistance(ai, player);
-    if (distance <= GRAPPLE_RANGE && ai.state !== 'GrappleEngaged') {
+    if (distance <= GRAPPLE_RANGE && ai.state !== 'GrappleEngaged' && player.y >= 0) {
       this.currentDecision = { action: 'grapple' };
       return this.currentDecision;
     }
     
-    // Priority 5: Move toward player (but avoid edges if balance low)
+    // Priority 6: Move toward player (but avoid edges if balance low)
     const shouldAvoidEdge = ai.balance < LOW_BALANCE_THRESHOLD && isNearEdge(ai, 100);
     if (shouldAvoidEdge) {
       // Move toward center
@@ -81,6 +89,33 @@ export class AIController {
     }
     
     return this.currentDecision;
+  }
+  
+  /**
+   * Determine if AI should jump
+   */
+  private shouldJump(ai: Fighter, player: Fighter): boolean {
+    // Can't jump if not able
+    if (!canJump(ai)) return false;
+    
+    const distance = getFighterDistance(ai, player);
+    
+    // Jump to stomp if player is stunned and close
+    if (player.state === 'Stunned' && distance < FIGHTER_WIDTH * 2 && ai.stamina >= JUMP_STAMINA_COST + 20) {
+      return Math.random() < 0.4; // 40% chance to try stomp
+    }
+    
+    // Jump to evade if player is jumping at us (potential stomp incoming)
+    if (isInAir(player) && distance < FIGHTER_WIDTH * 2) {
+      return Math.random() < 0.3; // 30% chance to evade
+    }
+    
+    // Occasional jump to mix up gameplay
+    if (ai.stamina > 60 && Math.random() < 0.05) { // 5% random jump
+      return true;
+    }
+    
+    return false;
   }
   
   /**

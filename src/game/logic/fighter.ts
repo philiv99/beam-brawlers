@@ -16,6 +16,11 @@ import {
   BEAM_RIGHT,
   FIGHTER_WIDTH,
   FIGHTER_SPEED,
+  JUMP_VELOCITY,
+  GRAVITY,
+  JUMP_STAMINA_COST,
+  JUMP_BALANCE_COST,
+  MIN_JUMP_HEIGHT_FOR_OVER,
 } from '../constants';
 import type { Fighter, FighterState, FacingDirection } from '../types';
 
@@ -30,7 +35,8 @@ export function createFighter(
   return {
     id,
     x,
-    y: 0, // Will be set relative to beam
+    y: 0, // 0 = on beam, negative = in air
+    velocityY: 0,
     facing,
     state: 'Idle',
     balance: MAX_BALANCE,
@@ -41,6 +47,7 @@ export function createFighter(
     comboCount: 0,
     lastMoveTime: 0,
     isDefending: false,
+    hasJumpedOver: false,
   };
 }
 
@@ -73,6 +80,8 @@ export function getFighterDistance(f1: Fighter, f2: Fighter): number {
  * Check if fighters are in grapple range
  */
 export function areInGrappleRange(f1: Fighter, f2: Fighter, range: number): boolean {
+  // Can't grapple if either fighter is in the air
+  if (f1.y < 0 || f2.y < 0) return false;
   return getFighterDistance(f1, f2) <= range;
 }
 
@@ -88,17 +97,35 @@ export function canAct(fighter: Fighter): boolean {
 }
 
 /**
+ * Check if fighter can jump
+ */
+export function canJump(fighter: Fighter): boolean {
+  return (
+    (fighter.state === 'Idle' || fighter.state === 'Moving') &&
+    fighter.y >= 0 && // Must be on ground
+    fighter.stamina >= JUMP_STAMINA_COST
+  );
+}
+
+/**
+ * Check if fighter is in the air
+ */
+export function isInAir(fighter: Fighter): boolean {
+  return fighter.y < 0 || fighter.state === 'Jumping';
+}
+
+/**
  * Check if fighter can initiate a grapple
  */
 export function canGrapple(fighter: Fighter): boolean {
-  return fighter.state === 'Idle' || fighter.state === 'Moving';
+  return (fighter.state === 'Idle' || fighter.state === 'Moving') && fighter.y >= 0;
 }
 
 /**
  * Check if fighter can be pinned
  */
 export function canBePinned(fighter: Fighter): boolean {
-  return fighter.state === 'Stunned' && isOnBeam(fighter);
+  return fighter.state === 'Stunned' && isOnBeam(fighter) && fighter.y >= 0;
 }
 
 /**
@@ -302,5 +329,135 @@ export function resetAfterFall(
     score: fighter.score + penalty, // Penalty is negative
     currentMove: null,
     isDefending: false,
+    y: 0,
+    velocityY: 0,
+    hasJumpedOver: false,
+  };
+}
+
+// =============================================================================
+// JUMP MECHANICS
+// =============================================================================
+
+/**
+ * Start a jump
+ */
+export function startJump(fighter: Fighter): Fighter {
+  if (!canJump(fighter)) {
+    return fighter;
+  }
+
+  return {
+    ...fighter,
+    state: 'Jumping',
+    velocityY: JUMP_VELOCITY,
+    stamina: fighter.stamina - JUMP_STAMINA_COST,
+    hasJumpedOver: false,
+  };
+}
+
+/**
+ * Update jump physics (call every frame while jumping)
+ */
+export function updateJumpPhysics(fighter: Fighter, deltaTime: number): Fighter {
+  if (fighter.state !== 'Jumping') {
+    return fighter;
+  }
+
+  // Apply gravity
+  const newVelocityY = fighter.velocityY + GRAVITY * deltaTime;
+  let newY = fighter.y + newVelocityY * deltaTime;
+
+  // Check if landed
+  if (newY >= 0) {
+    // Landed on beam
+    return {
+      ...fighter,
+      y: 0,
+      velocityY: 0,
+      state: 'Idle',
+      balance: Math.max(0, fighter.balance - JUMP_BALANCE_COST),
+      hasJumpedOver: false,
+    };
+  }
+
+  return {
+    ...fighter,
+    y: newY,
+    velocityY: newVelocityY,
+  };
+}
+
+/**
+ * Check if fighter is high enough to jump over opponent
+ */
+export function isHighEnoughToJumpOver(fighter: Fighter): boolean {
+  return fighter.y < -MIN_JUMP_HEIGHT_FOR_OVER;
+}
+
+/**
+ * Check if fighter is above another fighter (for stomp detection)
+ */
+export function isAboveFighter(jumper: Fighter, target: Fighter, threshold: number = FIGHTER_WIDTH): boolean {
+  // Must be in the air
+  if (jumper.y >= 0) return false;
+  // Must be within horizontal range
+  if (Math.abs(jumper.x - target.x) > threshold) return false;
+  // Target must be on ground
+  if (target.y < 0) return false;
+  return true;
+}
+
+/**
+ * Check if a stomp will occur (landing on opponent)
+ */
+export function willStomp(jumper: Fighter, target: Fighter, deltaTime: number): boolean {
+  if (jumper.state !== 'Jumping') return false;
+  
+  // Predict next position
+  const nextVelocityY = jumper.velocityY + GRAVITY * deltaTime;
+  const nextY = jumper.y + nextVelocityY * deltaTime;
+  
+  // Will land this frame?
+  if (nextY < 0) return false;
+  
+  // Is above opponent?
+  return isAboveFighter(jumper, target);
+}
+
+/**
+ * Mark that fighter has jumped over opponent (for bonus points)
+ */
+export function markJumpedOver(fighter: Fighter): Fighter {
+  return {
+    ...fighter,
+    hasJumpedOver: true,
+  };
+}
+
+/**
+ * Apply air movement (can move while jumping)
+ */
+export function moveInAir(
+  fighter: Fighter,
+  direction: 'left' | 'right',
+  deltaTime: number
+): Fighter {
+  if (fighter.state !== 'Jumping') {
+    return fighter;
+  }
+
+  // Reduced air control
+  const airControlMultiplier = 0.6;
+  const moveAmount = FIGHTER_SPEED * deltaTime * airControlMultiplier;
+  const newX =
+    direction === 'left'
+      ? Math.max(BEAM_LEFT + FIGHTER_WIDTH / 2, fighter.x - moveAmount)
+      : Math.min(BEAM_RIGHT - FIGHTER_WIDTH / 2, fighter.x + moveAmount);
+
+  return {
+    ...fighter,
+    x: newX,
+    facing: direction,
   };
 }

@@ -9,6 +9,11 @@ import {
   MOVE_REQUIREMENTS,
   MOVE_TIMINGS,
   CALLOUT_DURATION,
+  STOMP_DAMAGE,
+  STOMP_STUN_DURATION,
+  STOMP_POINTS,
+  JUMP_OVER_BONUS,
+  FIGHTER_WIDTH,
 } from './constants';
 import {
   createInitialState,
@@ -34,7 +39,10 @@ import {
   areInGrappleRange,
   canGrapple,
   canAct,
+  canJump,
+  isInAir,
   moveFighter,
+  moveInAir,
   setIdle,
   regenerate,
   applyMovementCosts,
@@ -47,6 +55,11 @@ import {
   startFalling,
   resetAfterFall,
   updateFacing,
+  startJump,
+  updateJumpPhysics,
+  isHighEnoughToJumpOver,
+  isAboveFighter,
+  markJumpedOver,
 } from './logic/fighter';
 import {
   validateMove,
@@ -101,6 +114,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'FIGHTER_FELL':
       return handleFighterFell(state, action.fighter);
 
+    case 'JUMP':
+      return handleJump(state, action.fighter);
+
+    case 'LAND':
+      return handleLand(state, action.fighter, action.stompedOpponent);
+
+    case 'JUMPED_OVER':
+      return handleJumpedOver(state, action.fighter);
+
     case 'RESET_POSITIONS':
       return resetPositions(state);
 
@@ -151,9 +173,48 @@ function updateGame(state: GameState, deltaTime: number, input: InputState): Gam
   player = updateStateTimer(player, deltaTime);
   opponent = updateStateTimer(opponent, deltaTime);
 
+  // Update jump physics for both fighters
+  const playerWasInAir = isInAir(player);
+  const opponentWasInAir = isInAir(opponent);
+  
+  player = updateJumpPhysics(player, deltaTime);
+  opponent = updateJumpPhysics(opponent, deltaTime);
+
+  // Check for jump-over (player jumping over opponent)
+  if (playerWasInAir && !player.hasJumpedOver && isHighEnoughToJumpOver(player)) {
+    // Check if we crossed over opponent
+    const playerMovingRight = player.facing === 'right';
+    const crossedOver = playerMovingRight 
+      ? player.x > opponent.x && newState.player.x <= opponent.x
+      : player.x < opponent.x && newState.player.x >= opponent.x;
+    
+    if (crossedOver || (Math.abs(player.x - opponent.x) < FIGHTER_WIDTH && isHighEnoughToJumpOver(player))) {
+      player = markJumpedOver(player);
+      player = awardScore(player, JUMP_OVER_BONUS);
+      newState = setCallout(newState, 'JUMP OVER!', `+${JUMP_OVER_BONUS}`);
+    }
+  }
+
+  // Check for stomp (landing on opponent)
+  if (playerWasInAir && !isInAir(player) && isAboveFighter({ ...player, y: -1 }, opponent)) {
+    // Player stomped opponent!
+    player = awardScore(player, STOMP_POINTS);
+    opponent = updateBalance(opponent, -STOMP_DAMAGE);
+    opponent = transitionState(opponent, 'Stunned', STOMP_STUN_DURATION);
+    newState = setCallout(newState, 'STOMP!', `+${STOMP_POINTS}`);
+  }
+  
+  if (opponentWasInAir && !isInAir(opponent) && isAboveFighter({ ...opponent, y: -1 }, player)) {
+    // Opponent stomped player!
+    opponent = awardScore(opponent, STOMP_POINTS);
+    player = updateBalance(player, -STOMP_DAMAGE);
+    player = transitionState(player, 'Stunned', STOMP_STUN_DURATION);
+    newState = setCallout(newState, 'STOMP!', `AI +${STOMP_POINTS}`);
+  }
+
   // Handle player input
-  if (canAct(player)) {
-    // Movement
+  if (canAct(player) && !isInAir(player)) {
+    // Movement (ground only for full control)
     if (input.moveLeft && !input.moveRight) {
       player = moveFighter(player, 'left', deltaTime);
       player = applyMovementCosts(player, deltaTime);
@@ -166,11 +227,22 @@ function updateGame(state: GameState, deltaTime: number, input: InputState): Gam
 
     // Defense
     player = { ...player, isDefending: input.defend };
+  } else if (isInAir(player)) {
+    // Air movement (reduced control)
+    if (input.moveLeft && !input.moveRight) {
+      player = moveInAir(player, 'left', deltaTime);
+    } else if (input.moveRight && !input.moveLeft) {
+      player = moveInAir(player, 'right', deltaTime);
+    }
   }
 
-  // Regeneration
-  player = regenerate(player, deltaTime);
-  opponent = regenerate(opponent, deltaTime);
+  // Regeneration (only when grounded)
+  if (!isInAir(player)) {
+    player = regenerate(player, deltaTime);
+  }
+  if (!isInAir(opponent)) {
+    opponent = regenerate(opponent, deltaTime);
+  }
 
   // Grapple costs
   if (newState.isGrappling) {
@@ -408,6 +480,78 @@ function resetPositions(state: GameState): GameState {
   newState = setGrappling(newState, false, null);
   newState = { ...newState, pinProgress: 0, pinningFighter: null };
   
+  return newState;
+}
+
+/**
+ * Handle jump action
+ */
+function handleJump(state: GameState, fighterId: 'player' | 'opponent'): GameState {
+  const fighter = fighterId === 'player' ? state.player : state.opponent;
+  
+  if (!canJump(fighter)) {
+    return state;
+  }
+
+  // Break grapple if grappling
+  let newState = state;
+  if (state.isGrappling) {
+    newState = breakGrapple(newState);
+  }
+
+  const jumpingFighter = startJump(fighter);
+  
+  if (fighterId === 'player') {
+    return updateFighters(newState, jumpingFighter, newState.opponent);
+  } else {
+    return updateFighters(newState, newState.player, jumpingFighter);
+  }
+}
+
+/**
+ * Handle landing (called when fighter touches ground)
+ */
+function handleLand(
+  state: GameState,
+  fighterId: 'player' | 'opponent',
+  stompedOpponent: boolean
+): GameState {
+  let player = state.player;
+  let opponent = state.opponent;
+
+  if (stompedOpponent) {
+    if (fighterId === 'player') {
+      player = awardScore(player, STOMP_POINTS);
+      opponent = updateBalance(opponent, -STOMP_DAMAGE);
+      opponent = transitionState(opponent, 'Stunned', STOMP_STUN_DURATION);
+    } else {
+      opponent = awardScore(opponent, STOMP_POINTS);
+      player = updateBalance(player, -STOMP_DAMAGE);
+      player = transitionState(player, 'Stunned', STOMP_STUN_DURATION);
+    }
+    
+    let newState = updateFighters(state, player, opponent);
+    newState = setCallout(newState, 'STOMP!', `+${STOMP_POINTS}`);
+    return newState;
+  }
+
+  return updateFighters(state, player, opponent);
+}
+
+/**
+ * Handle jump-over bonus
+ */
+function handleJumpedOver(state: GameState, fighterId: 'player' | 'opponent'): GameState {
+  let fighter = fighterId === 'player' ? state.player : state.opponent;
+  
+  fighter = markJumpedOver(fighter);
+  fighter = awardScore(fighter, JUMP_OVER_BONUS);
+  
+  let newState = fighterId === 'player'
+    ? updateFighters(state, fighter, state.opponent)
+    : updateFighters(state, state.player, fighter);
+  
+  newState = setCallout(newState, 'JUMP OVER!', `+${JUMP_OVER_BONUS}`);
   return newState;
 }
 

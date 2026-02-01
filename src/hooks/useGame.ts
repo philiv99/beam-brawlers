@@ -52,10 +52,15 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
         // Get player input
         const input = inputManager.getState();
 
-        // Handle single-press inputs (grapple, moves, pin)
+        // Handle single-press inputs (grapple, moves, pin, jump)
         if (currentState.scene === 'Playing' && !currentState.isPaused) {
-          // Grapple attempt
-          if (inputManager.wasJustPressed('grapple') && !currentState.isGrappling) {
+          // Jump attempt
+          if (inputManager.wasJustPressed('jump')) {
+            dispatch({ type: 'JUMP', fighter: 'player' });
+          }
+
+          // Grapple attempt (only when grounded)
+          if (inputManager.wasJustPressed('grapple') && !currentState.isGrappling && currentState.player.y >= 0) {
             dispatch({ type: 'ATTEMPT_GRAPPLE', initiator: 'player' });
           }
 
@@ -87,8 +92,11 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
           const aiDecision = aiController.decide(currentState, Date.now());
           
           switch (aiDecision.action) {
+            case 'jump':
+              dispatch({ type: 'JUMP', fighter: 'opponent' });
+              break;
             case 'grapple':
-              if (!currentState.isGrappling) {
+              if (!currentState.isGrappling && currentState.opponent.y >= 0) {
                 dispatch({ type: 'ATTEMPT_GRAPPLE', initiator: 'opponent' });
               }
               break;

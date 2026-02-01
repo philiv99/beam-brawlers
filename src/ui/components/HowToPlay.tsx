@@ -31,8 +31,8 @@ export const HowToPlay: React.FC<HowToPlayProps> = ({ onClose }) => {
                 <span>Move Left / Right</span>
               </div>
               <div className={styles.controlGroup}>
-                <span className={styles.key}>W / S</span>
-                <span>Balance Adjust</span>
+                <span className={styles.key}>W</span>
+                <span>Jump!</span>
               </div>
               <div className={styles.controlGroup}>
                 <span className={styles.key}>SPACE</span>
@@ -46,7 +46,34 @@ export const HowToPlay: React.FC<HowToPlayProps> = ({ onClose }) => {
           </section>
 
           <section className={styles.section}>
-            <h3>💥 Moves (While Grappling)</h3>
+            <h3>🦘 Jump Moves</h3>
+            <div className={styles.moves}>
+              <div className={styles.move}>
+                <span className={styles.key}>W</span>
+                <div>
+                  <strong>Jump</strong> (-15 stamina)
+                  <p>Press W to jump! Move A/D in air.</p>
+                </div>
+              </div>
+              <div className={styles.move}>
+                <span className={styles.key}>⬇️</span>
+                <div>
+                  <strong>Stomp</strong> (+175)
+                  <p>Land on opponent to stun them!</p>
+                </div>
+              </div>
+              <div className={styles.move}>
+                <span className={styles.key}>↔️</span>
+                <div>
+                  <strong>Jump Over</strong> (+50)
+                  <p>Jump over opponent for bonus points!</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.section}>
+            <h3>💥 Grapple Moves</h3>
             <div className={styles.moves}>
               <div className={styles.move}>
                 <span className={styles.key}>J</span>

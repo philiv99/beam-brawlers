@@ -9,6 +9,7 @@
 export type FighterState =
   | 'Idle'
   | 'Moving'
+  | 'Jumping'
   | 'GrappleEngaged'
   | 'ExecutingMove'
   | 'Stunned'
@@ -19,12 +20,15 @@ export type FighterState =
 
 export type MoveType = 'pancake' | 'scissors' | 'guillotine';
 
+export type GrappleMoveType = 'pancake' | 'scissors' | 'guillotine';
+
 export type FacingDirection = 'left' | 'right';
 
 export interface Fighter {
   id: 'player' | 'opponent';
   x: number; // Position along beam
-  y: number; // Should be on beam unless falling
+  y: number; // Vertical offset from beam (0 = on beam, negative = in air)
+  velocityY: number; // Vertical velocity for jumping
   facing: FacingDirection;
   state: FighterState;
   balance: number; // 0-100
@@ -39,6 +43,9 @@ export interface Fighter {
   
   // Defense
   isDefending: boolean;
+  
+  // Jump tracking
+  hasJumpedOver: boolean; // Track if jumped over opponent this jump
 }
 
 // =============================================================================
@@ -98,8 +105,8 @@ export interface GameState {
 export interface InputState {
   moveLeft: boolean;
   moveRight: boolean;
-  balanceUp: boolean;
-  balanceDown: boolean;
+  jump: boolean;
+  crouch: boolean;
   grapple: boolean;
   pancake: boolean;
   scissors: boolean;
@@ -126,6 +133,9 @@ export type GameAction =
   | { type: 'MOVE_COMPLETE'; fighter: 'player' | 'opponent'; success: boolean }
   | { type: 'ATTEMPT_PIN'; attacker: 'player' | 'opponent' }
   | { type: 'FIGHTER_FELL'; fighter: 'player' | 'opponent' }
+  | { type: 'JUMP'; fighter: 'player' | 'opponent' }
+  | { type: 'LAND'; fighter: 'player' | 'opponent'; stompedOpponent: boolean }
+  | { type: 'JUMPED_OVER'; fighter: 'player' | 'opponent' }
   | { type: 'RESET_POSITIONS' }
   | { type: 'SHOW_CALLOUT'; text: string; subtext?: string }
   | { type: 'CLEAR_CALLOUT' }
@@ -157,6 +167,6 @@ export interface MoveResult {
 // =============================================================================
 
 export interface AIDecision {
-  action: 'idle' | 'moveLeft' | 'moveRight' | 'grapple' | 'executeMove' | 'attemptPin' | 'defend';
+  action: 'idle' | 'moveLeft' | 'moveRight' | 'grapple' | 'executeMove' | 'attemptPin' | 'defend' | 'jump';
   move?: MoveType;
 }

@@ -31,6 +31,19 @@ export const FIGHTER_SPEED = 200; // pixels per second
 export const GRAPPLE_RANGE = 70; // pixels - distance to initiate grapple
 
 // =============================================================================
+// JUMP MECHANICS
+// =============================================================================
+export const JUMP_VELOCITY = -400; // Initial upward velocity (negative = up)
+export const GRAVITY = 1200; // Pixels per second squared
+export const JUMP_STAMINA_COST = 15; // Stamina cost to jump
+export const JUMP_BALANCE_COST = 10; // Balance cost on landing
+export const STOMP_DAMAGE = 20; // Balance damage when landing on opponent
+export const STOMP_STUN_DURATION = 0.8; // Seconds opponent is stunned after stomp
+export const STOMP_POINTS = 175; // Points for successful stomp
+export const JUMP_OVER_BONUS = 50; // Points for jumping over opponent
+export const MIN_JUMP_HEIGHT_FOR_OVER = 40; // Must be this high to jump over
+
+// =============================================================================
 // BALANCE & STAMINA
 // =============================================================================
 export const MAX_BALANCE = 100;
@@ -128,8 +141,8 @@ export const FALL_RESET_DELAY = 1.0; // seconds before resetting after fall
 export const KEY_BINDINGS = {
   moveLeft: 'KeyA',
   moveRight: 'KeyD',
-  balanceUp: 'KeyW',
-  balanceDown: 'KeyS',
+  jump: 'KeyW',
+  crouch: 'KeyS',
   grapple: 'Space',
   pancake: 'KeyJ',
   scissors: 'KeyK',

@@ -165,18 +165,22 @@ export class CanvasRenderer {
   private drawFighter(fighter: Fighter, accentColor: string): void {
     const ctx = this.ctx;
     const x = fighter.x;
-    const y = BEAM_Y - FIGHTER_HEIGHT;
+    const baseY = BEAM_Y - FIGHTER_HEIGHT;
     
-    // Adjust for falling
-    let drawY = y;
+    // Calculate actual Y position including jump offset
+    // fighter.y is negative when in air, so we add it to move up
+    let drawY = baseY + fighter.y;
+    
+    // Adjust for falling off beam
     if (fighter.state === 'Falling') {
       drawY = BEAM_Y + 50; // Below beam
     }
     
-    // Fighter shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    // Fighter shadow (changes size based on height)
+    const shadowScale = Math.max(0.3, 1 + fighter.y / 100); // Smaller when higher
+    ctx.fillStyle = `rgba(0, 0, 0, ${0.2 * shadowScale})`;
     ctx.beginPath();
-    ctx.ellipse(x, BEAM_Y - 2, FIGHTER_WIDTH / 2 - 5, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, BEAM_Y - 2, (FIGHTER_WIDTH / 2 - 5) * shadowScale, 8 * shadowScale, 0, 0, Math.PI * 2);
     ctx.fill();
     
     // Fighter body (simplified)
@@ -223,6 +227,10 @@ export class CanvasRenderer {
     let color: string = theme.colors.ink;
     
     switch (fighter.state) {
+      case 'Jumping':
+        text = '🦘';
+        color = theme.colors.mint;
+        break;
       case 'Stunned':
         text = '★★★';
         color = theme.colors.gold;

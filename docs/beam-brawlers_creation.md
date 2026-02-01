@@ -74,10 +74,22 @@
 - [ ] Animation refinements
 - [ ] Visual feedback (hit flash, shake)
 - [ ] Sound hooks (optional)
-- [x] Unit tests for game logic (68 tests passing)
+- [x] Unit tests for game logic (84 tests passing)
 - [ ] Integration testing
 - [x] Final acceptance testing
 - [x] Documentation updates
+
+### Phase 7: Jump Mechanics (Added Feature)
+- [x] Add jump constants (height, gravity, stamina cost)
+- [x] Update Fighter type with y position and velocityY
+- [x] Add jump physics logic (gravity, landing)
+- [x] Add jump input (W key)
+- [x] Add "Jump Over" ability (+50 bonus)
+- [x] Add "Stomp" attack (+175 points, stuns opponent)
+- [x] Update renderer for vertical movement
+- [x] Update AI to use/react to jumps
+- [x] Add tests for jump logic (16 new tests)
+- [x] Update How to Play with jump controls
 
 ---
 
@@ -92,8 +104,17 @@
 - Pure logic functions in src/game/logic/ for testability
 
 ### Controls
-- Keyboard-primary (A/D movement, SPACE grapple, J/K/L moves)
+- Keyboard-primary (A/D movement, W jump, SPACE grapple, J/K/L moves)
 - Mouse for UI interactions only
+
+### Jump Mechanics
+- W key initiates jump (costs 15 stamina)
+- Gravity physics: JUMP_VELOCITY = -400, GRAVITY = 1200
+- Landing costs 10 balance
+- Stomp attack: Land on opponent for +175 points and stun
+- Jump Over: Cross opponent at height for +50 bonus points
+- Air movement: 60% speed control while jumping
+- AI strategically uses jumps to approach or escape
 
 ---
 
@@ -103,3 +124,10 @@
 - Selected "Beam Brawlers" as game name (short, memorable, clear concept)
 - Using Canvas 2D for rendering due to real-time animation needs
 - Will implement AI opponent as default gameplay mode
+
+### 2026-02-01: Jump Feature Added
+- Added jump mechanics allowing fighters to jump over or stomp on opponents
+- W key changed from balance adjustment to jump
+- Stomp is a powerful attack (+175 pts) but requires positioning
+- Jump Over bonus encourages aggressive movement
+- AI uses jumps strategically based on distance and situation

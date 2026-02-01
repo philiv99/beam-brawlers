@@ -18,6 +18,14 @@ import {
   moveFighter,
   transitionState,
   awardScore,
+  canJump,
+  isInAir,
+  startJump,
+  updateJumpPhysics,
+  isHighEnoughToJumpOver,
+  isAboveFighter,
+  markJumpedOver,
+  moveInAir,
 } from '../src/game/logic/fighter';
 import {
   BEAM_LEFT,
@@ -210,5 +218,108 @@ describe('Scoring', () => {
     fighter = awardScore(fighter, 100);
     fighter = awardScore(fighter, 150);
     expect(fighter.score).toBe(250);
+  });
+});
+
+describe('Jump Mechanics', () => {
+  it('should allow jumping when on ground and enough stamina', () => {
+    const fighter = createFighter('player', 400, 'right');
+    expect(canJump(fighter)).toBe(true);
+  });
+
+  it('should not allow jumping when already in air', () => {
+    const fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -50 };
+    expect(canJump(fighter)).toBe(false);
+  });
+
+  it('should not allow jumping when stunned', () => {
+    const fighter = { ...createFighter('player', 400, 'right'), state: 'Stunned' as const };
+    expect(canJump(fighter)).toBe(false);
+  });
+
+  it('should not allow jumping with low stamina', () => {
+    const fighter = { ...createFighter('player', 400, 'right'), stamina: 5 };
+    expect(canJump(fighter)).toBe(false);
+  });
+
+  it('should start jump correctly', () => {
+    const fighter = createFighter('player', 400, 'right');
+    const jumped = startJump(fighter);
+    expect(jumped.state).toBe('Jumping');
+    expect(jumped.velocityY).toBeLessThan(0); // Negative = upward
+    expect(jumped.stamina).toBeLessThan(fighter.stamina);
+  });
+
+  it('should not start jump if canJump is false', () => {
+    const fighter = { ...createFighter('player', 400, 'right'), stamina: 5 };
+    const jumped = startJump(fighter);
+    expect(jumped.state).toBe('Idle'); // Unchanged
+  });
+
+  it('should update jump physics with gravity', () => {
+    let fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -50, velocityY: -200 };
+    fighter = updateJumpPhysics(fighter, 0.016);
+    expect(fighter.velocityY).toBeGreaterThan(-200); // Gravity slows ascent
+    expect(fighter.y).toBeLessThan(-50); // Still moving up initially
+  });
+
+  it('should land when y reaches 0', () => {
+    let fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -5, velocityY: 300 };
+    fighter = updateJumpPhysics(fighter, 0.016);
+    expect(fighter.y).toBe(0);
+    expect(fighter.state).toBe('Idle');
+    expect(fighter.velocityY).toBe(0);
+  });
+
+  it('should detect when fighter is high enough to jump over', () => {
+    const highFighter = { ...createFighter('player', 400, 'right'), y: -50 };
+    const lowFighter = { ...createFighter('player', 400, 'right'), y: -10 };
+    expect(isHighEnoughToJumpOver(highFighter)).toBe(true);
+    expect(isHighEnoughToJumpOver(lowFighter)).toBe(false);
+  });
+
+  it('should detect when fighter is above another', () => {
+    const jumper = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -30 };
+    const target = { ...createFighter('ai', 410, 'left'), y: 0 };
+    expect(isAboveFighter(jumper, target)).toBe(true);
+  });
+
+  it('should not detect above when jumper is on ground', () => {
+    const jumper = { ...createFighter('player', 400, 'right'), y: 0 };
+    const target = { ...createFighter('ai', 410, 'left'), y: 0 };
+    expect(isAboveFighter(jumper, target)).toBe(false);
+  });
+
+  it('should not detect above when too far horizontally', () => {
+    const jumper = { ...createFighter('player', 200, 'right'), state: 'Jumping' as const, y: -30 };
+    const target = { ...createFighter('ai', 600, 'left'), y: 0 };
+    expect(isAboveFighter(jumper, target)).toBe(false);
+  });
+
+  it('should mark jumped over', () => {
+    const fighter = createFighter('player', 400, 'right');
+    expect(fighter.hasJumpedOver).toBe(false);
+    const marked = markJumpedOver(fighter);
+    expect(marked.hasJumpedOver).toBe(true);
+  });
+
+  it('should allow air movement while jumping', () => {
+    const fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -50 };
+    const movedLeft = moveInAir(fighter, 'left', 0.1);
+    expect(movedLeft.x).toBeLessThan(400);
+    expect(movedLeft.facing).toBe('left');
+  });
+
+  it('should not allow air movement when not jumping', () => {
+    const fighter = createFighter('player', 400, 'right');
+    const moved = moveInAir(fighter, 'left', 0.1);
+    expect(moved.x).toBe(400); // Unchanged
+  });
+
+  it('should report correct in-air state', () => {
+    const grounded = createFighter('player', 400, 'right');
+    const inAir = { ...grounded, state: 'Jumping' as const, y: -50 };
+    expect(isInAir(grounded)).toBe(false);
+    expect(isInAir(inAir)).toBe(true);
   });
 });
