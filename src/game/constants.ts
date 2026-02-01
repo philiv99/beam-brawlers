@@ -162,3 +162,46 @@ export const AI_REACTION_DELAY = 200; // ms delay before AI reacts
 // =============================================================================
 export const CALLOUT_DURATION = 1.5; // seconds for move callout display
 export const HIT_FLASH_DURATION = 0.15; // seconds
+
+// =============================================================================
+// FRANK ZAPPA SONG NAMES FOR FIGHTERS
+// =============================================================================
+export const ZAPPA_FIGHTER_NAMES = [
+  'Peaches',
+  'Muffin Man',
+  'Cosmik Debris',
+  'Camarillo Brillo',
+  'Dinah-Moe Humm',
+  'Montana',
+  'Inca Roads',
+  'Pygmy Twylyte',
+  'Zomby Woof',
+  'Nanook',
+  'St. Alphonzo',
+  'Stink-Foot',
+  'Penguin in Bondage',
+  'Yellow Snow',
+  'Dirty Love',
+  'Po-Jama People',
+  'Titties & Beer',
+  'Broken Hearts',
+  'Catholic Girls',
+  'Bobby Brown',
+  'Joe\'s Garage',
+  'Watermelon',
+  'Willie the Pimp',
+  'Chunga',
+  'Waka/Jawaka',
+  'Hot Rats',
+  'Son of Orange',
+  'Uncle Meat',
+  'King Kong',
+  'Brown Shoes',
+] as const;
+
+// =============================================================================
+// AUDIO SETTINGS
+// =============================================================================
+export const AUDIO_ENABLED_KEY = `${STORAGE_PREFIX}audioEnabled`;
+export const DEFAULT_AUDIO_ENABLED = true;
+export const MASTER_VOLUME = 0.5;

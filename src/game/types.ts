@@ -26,6 +26,7 @@ export type FacingDirection = 'left' | 'right';
 
 export interface Fighter {
   id: 'player' | 'opponent';
+  name: string; // Display name (Zappa song title)
   x: number; // Position along beam
   y: number; // Vertical offset from beam (0 = on beam, negative = in air)
   velocityY: number; // Vertical velocity for jumping

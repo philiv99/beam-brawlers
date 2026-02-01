@@ -211,11 +211,14 @@ export class CanvasRenderer {
     // State indicator
     this.drawStateIndicator(fighter, x, drawY);
     
-    // Name label
-    ctx.fillStyle = theme.colors.ink;
-    ctx.font = '14px Nunito, sans-serif';
+    // Name label (Zappa song title)
+    ctx.fillStyle = fighter.id === 'player' ? theme.colors.mint : theme.colors.pop;
+    ctx.font = 'bold 12px Nunito, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(fighter.id === 'player' ? 'YOU' : 'AI', x, drawY - 5);
+    ctx.strokeStyle = theme.colors.ink;
+    ctx.lineWidth = 2;
+    ctx.strokeText(fighter.name, x, drawY - 5);
+    ctx.fillText(fighter.name, x, drawY - 5);
   }
 
   /**

@@ -36,7 +36,7 @@ import {
 
 describe('Fighter Creation', () => {
   it('should create a fighter with correct initial values', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     
     expect(fighter.id).toBe('player');
     expect(fighter.x).toBe(400);
@@ -48,7 +48,7 @@ describe('Fighter Creation', () => {
   });
 
   it('should create opponent with different id', () => {
-    const fighter = createFighter('opponent', 500, 'left');
+    const fighter = createFighter('opponent', 500, 'left', 'TestAI');
     expect(fighter.id).toBe('opponent');
     expect(fighter.facing).toBe('left');
   });
@@ -56,95 +56,95 @@ describe('Fighter Creation', () => {
 
 describe('Beam Position Checks', () => {
   it('should detect fighter on beam', () => {
-    const fighter = createFighter('player', (BEAM_LEFT + BEAM_RIGHT) / 2, 'right');
+    const fighter = createFighter('player', (BEAM_LEFT + BEAM_RIGHT) / 2, 'right', 'TestPlayer');
     expect(isOnBeam(fighter)).toBe(true);
   });
 
   it('should detect fighter off beam (too far left)', () => {
-    const fighter = createFighter('player', BEAM_LEFT - 100, 'right');
+    const fighter = createFighter('player', BEAM_LEFT - 100, 'right', 'TestPlayer');
     expect(isOnBeam(fighter)).toBe(false);
   });
 
   it('should detect fighter off beam (too far right)', () => {
-    const fighter = createFighter('player', BEAM_RIGHT + 100, 'right');
+    const fighter = createFighter('player', BEAM_RIGHT + 100, 'right', 'TestPlayer');
     expect(isOnBeam(fighter)).toBe(false);
   });
 
   it('should detect when near edge', () => {
-    const fighter = createFighter('player', BEAM_LEFT + 30, 'right');
+    const fighter = createFighter('player', BEAM_LEFT + 30, 'right', 'TestPlayer');
     expect(isNearEdge(fighter, 50)).toBe(true);
   });
 
   it('should detect when not near edge', () => {
-    const fighter = createFighter('player', (BEAM_LEFT + BEAM_RIGHT) / 2, 'right');
+    const fighter = createFighter('player', (BEAM_LEFT + BEAM_RIGHT) / 2, 'right', 'TestPlayer');
     expect(isNearEdge(fighter, 50)).toBe(false);
   });
 });
 
 describe('Distance and Range', () => {
   it('should calculate correct distance between fighters', () => {
-    const f1 = createFighter('player', 300, 'right');
-    const f2 = createFighter('opponent', 400, 'left');
+    const f1 = createFighter('player', 300, 'right', 'TestPlayer');
+    const f2 = createFighter('opponent', 400, 'left', 'TestAI');
     expect(getFighterDistance(f1, f2)).toBe(100);
   });
 
   it('should detect fighters in grapple range', () => {
-    const f1 = createFighter('player', 300, 'right');
-    const f2 = createFighter('opponent', 350, 'left');
+    const f1 = createFighter('player', 300, 'right', 'TestPlayer');
+    const f2 = createFighter('opponent', 350, 'left', 'TestAI');
     expect(areInGrappleRange(f1, f2, 70)).toBe(true);
   });
 
   it('should detect fighters out of grapple range', () => {
-    const f1 = createFighter('player', 300, 'right');
-    const f2 = createFighter('opponent', 500, 'left');
+    const f1 = createFighter('player', 300, 'right', 'TestPlayer');
+    const f2 = createFighter('opponent', 500, 'left', 'TestAI');
     expect(areInGrappleRange(f1, f2, 70)).toBe(false);
   });
 });
 
 describe('Fighter State Checks', () => {
   it('should allow actions when Idle', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     expect(canAct(fighter)).toBe(true);
   });
 
   it('should allow actions when Moving', () => {
-    const fighter = transitionState(createFighter('player', 400, 'right'), 'Moving');
+    const fighter = transitionState(createFighter('player', 400, 'right', 'TestPlayer'), 'Moving');
     expect(canAct(fighter)).toBe(true);
   });
 
   it('should not allow actions when Stunned', () => {
-    const fighter = transitionState(createFighter('player', 400, 'right'), 'Stunned', 1);
+    const fighter = transitionState(createFighter('player', 400, 'right', 'TestPlayer'), 'Stunned', 1);
     expect(canAct(fighter)).toBe(false);
   });
 
   it('should allow grapple when Idle', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     expect(canGrapple(fighter)).toBe(true);
   });
 
   it('should not allow grapple when already grappling', () => {
-    const fighter = transitionState(createFighter('player', 400, 'right'), 'GrappleEngaged');
+    const fighter = transitionState(createFighter('player', 400, 'right', 'TestPlayer'), 'GrappleEngaged');
     expect(canGrapple(fighter)).toBe(false);
   });
 
   it('should allow pinning stunned fighter on beam', () => {
-    let fighter = createFighter('player', 400, 'right');
+    let fighter = createFighter('player', 400, 'right', 'TestPlayer');
     fighter = transitionState(fighter, 'Stunned', 1);
     expect(canBePinned(fighter)).toBe(true);
   });
 
   it('should not allow pinning fighter not stunned', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     expect(canBePinned(fighter)).toBe(false);
   });
 
   it('should allow pin attempt with sufficient balance', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     expect(canAttemptPin(fighter, 20)).toBe(true);
   });
 
   it('should not allow pin attempt with insufficient balance', () => {
-    let fighter = createFighter('player', 400, 'right');
+    let fighter = createFighter('player', 400, 'right', 'TestPlayer');
     fighter = updateBalance(fighter, -90); // Balance = 10
     expect(canAttemptPin(fighter, 20)).toBe(false);
   });
@@ -152,32 +152,32 @@ describe('Fighter State Checks', () => {
 
 describe('Balance and Stamina Updates', () => {
   it('should increase balance', () => {
-    let fighter = createFighter('player', 400, 'right');
+    let fighter = createFighter('player', 400, 'right', 'TestPlayer');
     fighter = updateBalance(fighter, -50); // Now 50
     fighter = updateBalance(fighter, 20); // Now 70
     expect(fighter.balance).toBe(70);
   });
 
   it('should not exceed max balance', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const updated = updateBalance(fighter, 50);
     expect(updated.balance).toBe(MAX_BALANCE);
   });
 
   it('should not go below zero balance', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const updated = updateBalance(fighter, -150);
     expect(updated.balance).toBe(0);
   });
 
   it('should decrease stamina', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const updated = updateStamina(fighter, -30);
     expect(updated.stamina).toBe(70);
   });
 
   it('should not exceed max stamina', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const updated = updateStamina(fighter, 50);
     expect(updated.stamina).toBe(MAX_STAMINA);
   });
@@ -185,7 +185,7 @@ describe('Balance and Stamina Updates', () => {
 
 describe('Movement', () => {
   it('should move left', () => {
-    const fighter = createFighter('player', 500, 'right');
+    const fighter = createFighter('player', 500, 'right', 'TestPlayer');
     const moved = moveFighter(fighter, 'left', 0.016); // ~60fps
     expect(moved.x).toBeLessThan(500);
     expect(moved.facing).toBe('left');
@@ -193,14 +193,14 @@ describe('Movement', () => {
   });
 
   it('should move right', () => {
-    const fighter = createFighter('player', 400, 'left');
+    const fighter = createFighter('player', 400, 'left', 'TestPlayer');
     const moved = moveFighter(fighter, 'right', 0.016);
     expect(moved.x).toBeGreaterThan(400);
     expect(moved.facing).toBe('right');
   });
 
   it('should not move past beam left edge', () => {
-    const fighter = createFighter('player', BEAM_LEFT + 30, 'right');
+    const fighter = createFighter('player', BEAM_LEFT + 30, 'right', 'TestPlayer');
     const moved = moveFighter(fighter, 'left', 10); // Large dt to test clamping
     expect(moved.x).toBeGreaterThanOrEqual(BEAM_LEFT + 25); // FIGHTER_WIDTH/2
   });
@@ -208,13 +208,13 @@ describe('Movement', () => {
 
 describe('Scoring', () => {
   it('should award score', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const scored = awardScore(fighter, 200);
     expect(scored.score).toBe(200);
   });
 
   it('should accumulate score', () => {
-    let fighter = createFighter('player', 400, 'right');
+    let fighter = createFighter('player', 400, 'right', 'TestPlayer');
     fighter = awardScore(fighter, 100);
     fighter = awardScore(fighter, 150);
     expect(fighter.score).toBe(250);
@@ -223,27 +223,27 @@ describe('Scoring', () => {
 
 describe('Jump Mechanics', () => {
   it('should allow jumping when on ground and enough stamina', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     expect(canJump(fighter)).toBe(true);
   });
 
   it('should not allow jumping when already in air', () => {
-    const fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -50 };
+    const fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), state: 'Jumping' as const, y: -50 };
     expect(canJump(fighter)).toBe(false);
   });
 
   it('should not allow jumping when stunned', () => {
-    const fighter = { ...createFighter('player', 400, 'right'), state: 'Stunned' as const };
+    const fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), state: 'Stunned' as const };
     expect(canJump(fighter)).toBe(false);
   });
 
   it('should not allow jumping with low stamina', () => {
-    const fighter = { ...createFighter('player', 400, 'right'), stamina: 5 };
+    const fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), stamina: 5 };
     expect(canJump(fighter)).toBe(false);
   });
 
   it('should start jump correctly', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const jumped = startJump(fighter);
     expect(jumped.state).toBe('Jumping');
     expect(jumped.velocityY).toBeLessThan(0); // Negative = upward
@@ -251,20 +251,20 @@ describe('Jump Mechanics', () => {
   });
 
   it('should not start jump if canJump is false', () => {
-    const fighter = { ...createFighter('player', 400, 'right'), stamina: 5 };
+    const fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), stamina: 5 };
     const jumped = startJump(fighter);
     expect(jumped.state).toBe('Idle'); // Unchanged
   });
 
   it('should update jump physics with gravity', () => {
-    let fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -50, velocityY: -200 };
+    let fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), state: 'Jumping' as const, y: -50, velocityY: -200 };
     fighter = updateJumpPhysics(fighter, 0.016);
     expect(fighter.velocityY).toBeGreaterThan(-200); // Gravity slows ascent
     expect(fighter.y).toBeLessThan(-50); // Still moving up initially
   });
 
   it('should land when y reaches 0', () => {
-    let fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -5, velocityY: 300 };
+    let fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), state: 'Jumping' as const, y: -5, velocityY: 300 };
     fighter = updateJumpPhysics(fighter, 0.016);
     expect(fighter.y).toBe(0);
     expect(fighter.state).toBe('Idle');
@@ -272,54 +272,55 @@ describe('Jump Mechanics', () => {
   });
 
   it('should detect when fighter is high enough to jump over', () => {
-    const highFighter = { ...createFighter('player', 400, 'right'), y: -50 };
-    const lowFighter = { ...createFighter('player', 400, 'right'), y: -10 };
+    const highFighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), y: -50 };
+    const lowFighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), y: -10 };
     expect(isHighEnoughToJumpOver(highFighter)).toBe(true);
     expect(isHighEnoughToJumpOver(lowFighter)).toBe(false);
   });
 
   it('should detect when fighter is above another', () => {
-    const jumper = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -30 };
-    const target = { ...createFighter('ai', 410, 'left'), y: 0 };
+    const jumper = { ...createFighter('player', 400, 'right', 'TestPlayer'), state: 'Jumping' as const, y: -30 };
+    const target = { ...createFighter('opponent', 410, 'left', 'TestAI'), y: 0 };
     expect(isAboveFighter(jumper, target)).toBe(true);
   });
 
   it('should not detect above when jumper is on ground', () => {
-    const jumper = { ...createFighter('player', 400, 'right'), y: 0 };
-    const target = { ...createFighter('ai', 410, 'left'), y: 0 };
+    const jumper = { ...createFighter('player', 400, 'right', 'TestPlayer'), y: 0 };
+    const target = { ...createFighter('opponent', 410, 'left', 'TestAI'), y: 0 };
     expect(isAboveFighter(jumper, target)).toBe(false);
   });
 
   it('should not detect above when too far horizontally', () => {
-    const jumper = { ...createFighter('player', 200, 'right'), state: 'Jumping' as const, y: -30 };
-    const target = { ...createFighter('ai', 600, 'left'), y: 0 };
+    const jumper = { ...createFighter('player', 200, 'right', 'TestPlayer'), state: 'Jumping' as const, y: -30 };
+    const target = { ...createFighter('opponent', 600, 'left', 'TestAI'), y: 0 };
     expect(isAboveFighter(jumper, target)).toBe(false);
   });
 
   it('should mark jumped over', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     expect(fighter.hasJumpedOver).toBe(false);
     const marked = markJumpedOver(fighter);
     expect(marked.hasJumpedOver).toBe(true);
   });
 
   it('should allow air movement while jumping', () => {
-    const fighter = { ...createFighter('player', 400, 'right'), state: 'Jumping' as const, y: -50 };
+    const fighter = { ...createFighter('player', 400, 'right', 'TestPlayer'), state: 'Jumping' as const, y: -50 };
     const movedLeft = moveInAir(fighter, 'left', 0.1);
     expect(movedLeft.x).toBeLessThan(400);
     expect(movedLeft.facing).toBe('left');
   });
 
   it('should not allow air movement when not jumping', () => {
-    const fighter = createFighter('player', 400, 'right');
+    const fighter = createFighter('player', 400, 'right', 'TestPlayer');
     const moved = moveInAir(fighter, 'left', 0.1);
     expect(moved.x).toBe(400); // Unchanged
   });
 
   it('should report correct in-air state', () => {
-    const grounded = createFighter('player', 400, 'right');
+    const grounded = createFighter('player', 400, 'right', 'TestPlayer');
     const inAir = { ...grounded, state: 'Jumping' as const, y: -50 };
     expect(isInAir(grounded)).toBe(false);
     expect(isInAir(inAir)).toBe(true);
   });
 });
+

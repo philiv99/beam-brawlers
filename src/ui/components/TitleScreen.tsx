@@ -2,7 +2,7 @@
  * Beam Brawlers - Title Screen Component
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GAME_NAME } from '../../game/constants';
 import { Button } from './Button';
 import styles from './TitleScreen.module.css';
@@ -10,9 +10,23 @@ import styles from './TitleScreen.module.css';
 interface TitleScreenProps {
   onStart: () => void;
   onHowToPlay: () => void;
+  onToggleAudio: () => boolean;
+  isAudioEnabled: () => boolean;
 }
 
-export const TitleScreen: React.FC<TitleScreenProps> = ({ onStart, onHowToPlay }) => {
+export const TitleScreen: React.FC<TitleScreenProps> = ({ 
+  onStart, 
+  onHowToPlay,
+  onToggleAudio,
+  isAudioEnabled,
+}) => {
+  const [audioEnabled, setAudioEnabled] = useState(isAudioEnabled());
+
+  const handleToggleAudio = () => {
+    const newState = onToggleAudio();
+    setAudioEnabled(newState);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -36,11 +50,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onStart, onHowToPlay }
           <Button variant="secondary" size="medium" onClick={onHowToPlay}>
             How to Play
           </Button>
+          <Button variant="secondary" size="small" onClick={handleToggleAudio}>
+            {audioEnabled ? '🔊 Sound ON' : '🔇 Sound OFF'}
+          </Button>
         </div>
 
         {/* Footer */}
         <footer className={styles.footer}>
           <p>A LinkittyDo Game</p>
+          <p className={styles.zappa}>Fighter names powered by Frank Zappa 🎸</p>
         </footer>
       </div>
     </div>

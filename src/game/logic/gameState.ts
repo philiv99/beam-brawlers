@@ -11,6 +11,7 @@ import {
   PIN_DURATION,
   MIN_BALANCE_FOR_PIN,
   GRAPPLE_RANGE,
+  ZAPPA_FIGHTER_NAMES,
 } from '../constants';
 import type {
   GameState,
@@ -23,6 +24,16 @@ import type {
 import { createFighter, canBePinned, canAttemptPin, areInGrappleRange } from './fighter';
 
 /**
+ * Get a random Zappa song name
+ */
+export function getRandomZappaName(exclude?: string): string {
+  const available = exclude
+    ? ZAPPA_FIGHTER_NAMES.filter((n) => n !== exclude)
+    : [...ZAPPA_FIGHTER_NAMES];
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+/**
  * Create initial game state
  */
 export function createInitialState(): GameState {
@@ -30,13 +41,16 @@ export function createInitialState(): GameState {
   const playerStartX = beamCenter - 100;
   const opponentStartX = beamCenter + 100;
 
+  const playerName = getRandomZappaName();
+  const opponentName = getRandomZappaName(playerName);
+
   return {
     scene: 'Title',
     matchTimer: MATCH_DURATION,
     countdownTimer: COUNTDOWN_DURATION,
     isPaused: false,
-    player: createFighter('player', playerStartX, 'right'),
-    opponent: createFighter('opponent', opponentStartX, 'left'),
+    player: createFighter('player', playerStartX, 'right', playerName),
+    opponent: createFighter('opponent', opponentStartX, 'left', opponentName),
     isGrappling: false,
     grappleInitiator: null,
     pinProgress: 0,

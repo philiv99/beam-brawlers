@@ -30,10 +30,12 @@ import type { Fighter, FighterState, FacingDirection } from '../types';
 export function createFighter(
   id: 'player' | 'opponent',
   x: number,
-  facing: FacingDirection
+  facing: FacingDirection,
+  name: string
 ): Fighter {
   return {
     id,
+    name,
     x,
     y: 0, // 0 = on beam, negative = in air
     velocityY: 0,

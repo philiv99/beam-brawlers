@@ -11,26 +11,34 @@ interface GameOverProps {
   result: GameResult;
   onPlayAgain: () => void;
   onMainMenu: () => void;
+  playerName: string;
+  opponentName: string;
 }
 
-export const GameOver: React.FC<GameOverProps> = ({ result, onPlayAgain, onMainMenu }) => {
+export const GameOver: React.FC<GameOverProps> = ({ 
+  result, 
+  onPlayAgain, 
+  onMainMenu,
+  playerName,
+  opponentName,
+}) => {
   const isPlayerWin = result.winner === 'player';
   const isDraw = result.winner === 'draw';
 
   const getTitle = () => {
     if (isDraw) return 'DRAW!';
-    return isPlayerWin ? 'YOU WIN!' : 'YOU LOSE!';
+    return isPlayerWin ? `${playerName} WINS!` : `${opponentName} WINS!`;
   };
 
   const getSubtitle = () => {
     switch (result.reason) {
       case 'pin':
-        return isPlayerWin ? 'Pinned your opponent!' : 'You got pinned!';
+        return isPlayerWin ? `${playerName} pinned ${opponentName}!` : `${opponentName} pinned ${playerName}!`;
       case 'timeout':
         if (isDraw) return 'Time ran out - tied score!';
         return 'Time ran out!';
       case 'surrender':
-        return 'Opponent surrendered!';
+        return `${opponentName} surrendered!`;
       default:
         return '';
     }
@@ -50,12 +58,12 @@ export const GameOver: React.FC<GameOverProps> = ({ result, onPlayAgain, onMainM
 
         <div className={styles.scores}>
           <div className={styles.scoreBox}>
-            <span className={styles.label}>YOU</span>
+            <span className={styles.label}>{playerName}</span>
             <span className={styles.score}>{result.playerScore}</span>
           </div>
           <div className={styles.vs}>VS</div>
           <div className={styles.scoreBox}>
-            <span className={styles.label}>AI</span>
+            <span className={styles.label}>{opponentName}</span>
             <span className={styles.score}>{result.opponentScore}</span>
           </div>
         </div>

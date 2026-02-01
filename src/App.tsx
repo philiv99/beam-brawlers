@@ -19,6 +19,8 @@ function App() {
     hideHowToPlay,
     restart,
     goToMainMenu,
+    toggleAudio,
+    isAudioEnabled,
   } = useGame(canvasRef);
 
   return (
@@ -37,7 +39,12 @@ function App() {
 
       {/* Title Screen */}
       {state.scene === 'Title' && (
-        <TitleScreen onStart={startGame} onHowToPlay={showHowToPlay} />
+        <TitleScreen 
+          onStart={startGame} 
+          onHowToPlay={showHowToPlay}
+          onToggleAudio={toggleAudio}
+          isAudioEnabled={isAudioEnabled}
+        />
       )}
 
       {/* How to Play Overlay */}
@@ -49,6 +56,8 @@ function App() {
           result={state.result}
           onPlayAgain={restart}
           onMainMenu={goToMainMenu}
+          playerName={state.player.name}
+          opponentName={state.opponent.name}
         />
       )}
 

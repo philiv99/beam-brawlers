@@ -8,6 +8,7 @@ import { gameReducer, getInitialState } from '../game/gameReducer';
 import { GameLoop } from '../engine/gameLoop';
 import { InputManager } from '../engine/input';
 import { CanvasRenderer } from '../engine/renderer';
+import { audioManager } from '../engine/audio';
 import { AIController } from '../game/ai';
 import { GRAPPLE_RANGE, MIN_BALANCE_FOR_PIN } from '../game/constants';
 import type { GameState } from '../game/types';
@@ -21,9 +22,13 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const rendererRef = useRef<CanvasRenderer | null>(null);
   const aiControllerRef = useRef<AIController | null>(null);
   const stateRef = useRef<GameState>(state);
+  const prevStateRef = useRef<GameState>(state);
+  const lastCountdownRef = useRef<number>(0);
+  const lastPinProgressRef = useRef<number>(0);
 
   // Keep stateRef current
   useEffect(() => {
+    prevStateRef.current = stateRef.current;
     stateRef.current = state;
   }, [state]);
 
@@ -56,6 +61,10 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
         if (currentState.scene === 'Playing' && !currentState.isPaused) {
           // Jump attempt
           if (inputManager.wasJustPressed('jump')) {
+            const canJump = currentState.player.state === 'Idle' || currentState.player.state === 'Moving';
+            if (canJump && currentState.player.y >= 0 && currentState.player.stamina >= 15) {
+              audioManager.play('jump');
+            }
             dispatch({ type: 'JUMP', fighter: 'player' });
           }
 
@@ -151,6 +160,114 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
     };
   }, [canvasRef]);
 
+  // Sound effects based on state changes
+  useEffect(() => {
+    const prev = prevStateRef.current;
+    const curr = state;
+
+    // Countdown beeps
+    if (curr.scene === 'Countdown') {
+      const prevSecond = Math.ceil(prev.countdownTimer);
+      const currSecond = Math.ceil(curr.countdownTimer);
+      if (currSecond !== prevSecond && currSecond > 0 && currSecond <= 3) {
+        if (currSecond !== lastCountdownRef.current) {
+          lastCountdownRef.current = currSecond;
+          audioManager.play('countdown');
+        }
+      }
+    }
+
+    // Match start
+    if (prev.scene === 'Countdown' && curr.scene === 'Playing') {
+      audioManager.play('match_start');
+      lastCountdownRef.current = 0;
+    }
+
+    // Grapple initiated
+    if (!prev.isGrappling && curr.isGrappling) {
+      audioManager.play('grapple');
+    }
+
+    // Player landed (from jump)
+    if (prev.player.state === 'Jumping' && curr.player.state !== 'Jumping' && curr.player.y >= 0) {
+      if (curr.player.state === 'Stunned' || prev.opponent.state === 'Stunned') {
+        // Landed stomp was handled
+      } else {
+        audioManager.play('land');
+      }
+    }
+
+    // Opponent landed
+    if (prev.opponent.state === 'Jumping' && curr.opponent.state !== 'Jumping' && curr.opponent.y >= 0) {
+      if (curr.opponent.state === 'Stunned' || prev.player.state === 'Stunned') {
+        // Stomp
+      } else {
+        audioManager.play('land');
+      }
+    }
+
+    // Stomp detected (someone got stunned by a landing)
+    if (prev.player.state === 'Jumping' && curr.player.state === 'Idle' && 
+        prev.opponent.state !== 'Stunned' && curr.opponent.state === 'Stunned') {
+      audioManager.play('stomp');
+    }
+    if (prev.opponent.state === 'Jumping' && curr.opponent.state === 'Idle' && 
+        prev.player.state !== 'Stunned' && curr.player.state === 'Stunned') {
+      audioManager.play('stomp');
+    }
+
+    // Callout appeared (move executed)
+    if (curr.currentCallout && (!prev.currentCallout || prev.currentCallout.id !== curr.currentCallout.id)) {
+      const text = curr.currentCallout.text.toUpperCase();
+      if (text.includes('PANCAKE')) {
+        audioManager.play('pancake');
+      } else if (text.includes('SCISSORS')) {
+        audioManager.play('scissors');
+      } else if (text.includes('GUILLOTINE')) {
+        audioManager.play('guillotine');
+      } else if (text.includes('STOMP')) {
+        audioManager.play('stomp');
+      } else if (text.includes('JUMP')) {
+        audioManager.play('score');
+      }
+    }
+
+    // Pin started
+    if (prev.pinningFighter === null && curr.pinningFighter !== null) {
+      audioManager.play('pin_start');
+      lastPinProgressRef.current = 0;
+    }
+
+    // Pin progress tick (every ~0.5 seconds)
+    if (curr.pinningFighter !== null && curr.pinProgress > 0) {
+      const prevTick = Math.floor(prev.pinProgress * 6);
+      const currTick = Math.floor(curr.pinProgress * 6);
+      if (currTick > prevTick) {
+        audioManager.play('pin_tick');
+      }
+    }
+
+    // Fighter fell
+    if (prev.player.state !== 'Falling' && curr.player.state === 'Falling') {
+      audioManager.play('fall');
+    }
+    if (prev.opponent.state !== 'Falling' && curr.opponent.state === 'Falling') {
+      audioManager.play('fall');
+    }
+
+    // Game over
+    if (prev.scene !== 'GameOver' && curr.scene === 'GameOver' && curr.result) {
+      if (curr.result.winner === 'player') {
+        audioManager.play('victory');
+      } else if (curr.result.winner === 'opponent') {
+        audioManager.play('defeat');
+      } else {
+        // Draw - play a neutral sound
+        audioManager.play('countdown');
+      }
+    }
+  }, [state]);
+
   // Start/stop input based on scene
   useEffect(() => {
     const inputManager = inputManagerRef.current;
@@ -184,6 +301,9 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
 
   // Action dispatchers
   const startGame = useCallback(() => {
+    // Initialize audio on first user interaction
+    audioManager.init();
+    audioManager.resume();
     dispatch({ type: 'START_GAME' });
   }, []);
 
@@ -219,6 +339,15 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
     }, 100);
   }, []);
 
+  const toggleAudio = useCallback(() => {
+    audioManager.init();
+    return audioManager.toggle();
+  }, []);
+
+  const isAudioEnabled = useCallback(() => {
+    return audioManager.isEnabled();
+  }, []);
+
   return {
     state,
     startGame,
@@ -228,5 +357,7 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
     resume,
     restart,
     goToMainMenu,
+    toggleAudio,
+    isAudioEnabled,
   };
 }

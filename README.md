@@ -65,6 +65,23 @@ npm run preview
 npm test
 ```
 
+## 🔊 Sound Effects
+
+The game features synthesized sound effects using Web Audio API:
+- Jump, land, and stomp sounds
+- Wrestling move impacts (pancake, scissors, guillotine)
+- Pin countdown ticks
+- Victory/defeat fanfares
+
+Toggle sound on/off from the title screen. Preference is saved.
+
+## 🎸 Fighter Names
+
+Fighters are named after **Frank Zappa songs**! Each match features a random pair from classics like:
+- Peaches, Muffin Man, Cosmik Debris
+- Zomby Woof, Montana, Inca Roads
+- Bobby Brown, Joe's Garage, and more!
+
 ## 🎨 Theme
 
 Built with the **LinkittyDo** visual identity:
@@ -76,11 +93,11 @@ Built with the **LinkittyDo** visual identity:
 
 ```
 src/
-├── engine/          # Game loop, input, renderer
+├── engine/          # Game loop, input, renderer, audio
 ├── game/
 │   ├── logic/       # Pure game rules (testable)
 │   ├── ai.ts        # AI opponent
-│   ├── constants.ts # Game configuration
+│   ├── constants.ts # Game configuration + Zappa names
 │   ├── types.ts     # TypeScript types
 │   └── gameReducer.ts
 ├── hooks/           # React hooks

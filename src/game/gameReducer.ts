@@ -469,8 +469,9 @@ function handleFighterFell(
 function resetPositions(state: GameState): GameState {
   const positions = getResetPositions();
   
-  let player = createFighter('player', positions.playerX, 'right');
-  let opponent = createFighter('opponent', positions.opponentX, 'left');
+  // Keep original names when resetting
+  let player = createFighter('player', positions.playerX, 'right', state.player.name);
+  let opponent = createFighter('opponent', positions.opponentX, 'left', state.opponent.name);
   
   // Preserve scores
   player = { ...player, score: state.player.score };

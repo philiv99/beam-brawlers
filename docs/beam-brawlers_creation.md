@@ -91,6 +91,17 @@
 - [x] Add tests for jump logic (16 new tests)
 - [x] Update How to Play with jump controls
 
+### Phase 8: Sound Effects & Fighter Names
+- [x] Create AudioManager using Web Audio synthesis (no external files)
+- [x] Add sound effects: jump, land, stomp, grapple, moves, pin, victory/defeat
+- [x] Add mute toggle with localStorage persistence
+- [x] Add mute button to Title screen
+- [x] Create list of 30 Frank Zappa song titles for fighter names
+- [x] Update Fighter type with name property
+- [x] Assign random Zappa names to fighters each match
+- [x] Display names in renderer and Game Over screen
+- [x] Update tests (84 tests total passing)
+
 ---
 
 ## Technical Decisions
@@ -116,6 +127,18 @@
 - Air movement: 60% speed control while jumping
 - AI strategically uses jumps to approach or escape
 
+### Audio System
+- Web Audio API synthesis (no external sound files needed)
+- Sounds: jump, land, stomp, grapple, pancake, scissors, guillotine, pin_start, pin_tick, victory, defeat, fall, countdown
+- Mute toggle persisted in localStorage
+- Audio initialized on first user interaction (browser policy compliance)
+
+### Fighter Names
+- Fighters get random names from Frank Zappa song titles
+- 30 song titles in the pool (Peaches, Muffin Man, Cosmik Debris, etc.)
+- Names displayed above fighters and in Game Over screen
+- Each match gets fresh random names
+
 ---
 
 ## Notes & Decisions
@@ -131,3 +154,8 @@
 - Stomp is a powerful attack (+175 pts) but requires positioning
 - Jump Over bonus encourages aggressive movement
 - AI uses jumps strategically based on distance and situation
+
+### 2026-02-01: Sound & Names Added
+- Added Web Audio synthesis-based sound effects (no external files)
+- Fighter names are now Frank Zappa song titles (adds personality and humor)
+- Sound toggle persisted to localStorage for user preference

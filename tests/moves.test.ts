@@ -16,8 +16,8 @@ import { MOVE_REQUIREMENTS, SCORING, BEAM_LEFT, BEAM_RIGHT, GRAPPLE_RANGE } from
 describe('Move Validation', () => {
   const createGrapplingFighters = () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    let player = createFighter('player', center - 30, 'right');
-    let opponent = createFighter('opponent', center + 30, 'left');
+    let player = createFighter('player', center - 30, 'right', 'TestPlayer');
+    let opponent = createFighter('opponent', center + 30, 'left', 'TestAI');
     player = transitionState(player, 'GrappleEngaged');
     opponent = transitionState(opponent, 'GrappleEngaged');
     return { player, opponent };
@@ -47,8 +47,8 @@ describe('Move Validation', () => {
 
   it('should reject move when not grappling', () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    const player = createFighter('player', center - 30, 'right'); // Idle
-    const opponent = createFighter('opponent', center + 30, 'left');
+    const player = createFighter('player', center - 30, 'right', 'TestPlayer'); // Idle
+    const opponent = createFighter('opponent', center + 30, 'left', 'TestAI');
     const result = validateMove(player, opponent, 'pancake');
     expect(result.canExecute).toBe(false);
     expect(result.reason).toContain('grappling');
@@ -56,8 +56,8 @@ describe('Move Validation', () => {
 
   it('should reject move when out of range', () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    let player = createFighter('player', center - 100, 'right');
-    let opponent = createFighter('opponent', center + 100, 'left');
+    let player = createFighter('player', center - 100, 'right', 'TestPlayer');
+    let opponent = createFighter('opponent', center + 100, 'left', 'TestAI');
     player = transitionState(player, 'GrappleEngaged');
     const result = validateMove(player, opponent, 'pancake');
     expect(result.canExecute).toBe(false);
@@ -94,7 +94,7 @@ describe('Move Validation', () => {
 describe('Move Scoring', () => {
   it('should calculate base points for Pancake', () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    let player = createFighter('player', center, 'right');
+    let player = createFighter('player', center, 'right', 'TestPlayer');
     player = updateBalance(player, -30); // Balance = 70 (below bonus threshold)
     
     const result = calculateMoveScore('pancake', player, Date.now());
@@ -104,7 +104,7 @@ describe('Move Scoring', () => {
 
   it('should add balance bonus when balance >= 80', () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    const player = createFighter('player', center, 'right'); // Balance = 100
+    const player = createFighter('player', center, 'right', 'TestPlayer'); // Balance = 100
     
     const result = calculateMoveScore('pancake', player, Date.now());
     expect(result.bonuses.balance).toBe(true);
@@ -113,7 +113,7 @@ describe('Move Scoring', () => {
 
   it('should calculate correct points for Scissors', () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    let player = createFighter('player', center, 'right');
+    let player = createFighter('player', center, 'right', 'TestPlayer');
     player = updateBalance(player, -30);
     
     const result = calculateMoveScore('scissors', player, Date.now());
@@ -122,7 +122,7 @@ describe('Move Scoring', () => {
 
   it('should calculate correct points for Guillotine', () => {
     const center = (BEAM_LEFT + BEAM_RIGHT) / 2;
-    let player = createFighter('player', center, 'right');
+    let player = createFighter('player', center, 'right', 'TestPlayer');
     player = updateBalance(player, -30);
     
     const result = calculateMoveScore('guillotine', player, Date.now());
@@ -162,3 +162,4 @@ describe('Move Configuration', () => {
     expect(getMoveName('guillotine')).toBe('Guillotine');
   });
 });
+
