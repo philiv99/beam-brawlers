@@ -65,6 +65,23 @@ npm run preview
 npm test
 ```
 
+## 👥 The Crowd
+
+A packed, animated crowd watches every match!
+- **~175 spectators** across 5 rows of bleachers
+- **~15% are nematodes** 🪱 (yes, worms in the audience)
+- Crowd members **bob, wave arms, and cheer** based on excitement
+- **Voice bubbles** ("GO!", "WOO!", "SLAM!") float up during big moments
+- **Crowd sounds**: cheers, gasps, and "oohs" react to the action
+
+## 🎬 Animations
+
+Fighters have dynamic state-based animations:
+- **Jumping**: Arms spread, motion blur effect
+- **Falling**: Tumbling rotation, flailing limbs, "AAAH!" scream
+- **Stunned**: Wobbling body, spiral dizzy eyes
+- **Motion lines** for dramatic falls
+
 ## 🔊 Sound Effects
 
 The game features synthesized sound effects using Web Audio API:
@@ -72,6 +89,7 @@ The game features synthesized sound effects using Web Audio API:
 - Wrestling move impacts (pancake, scissors, guillotine)
 - Pin countdown ticks
 - Victory/defeat fanfares
+- **Crowd reactions** (cheers, gasps, oohs)
 
 Toggle sound on/off from the title screen. Preference is saved.
 

@@ -210,10 +210,12 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
     if (prev.player.state === 'Jumping' && curr.player.state === 'Idle' && 
         prev.opponent.state !== 'Stunned' && curr.opponent.state === 'Stunned') {
       audioManager.play('stomp');
+      audioManager.play('crowd_cheer'); // Crowd reacts to stomp
     }
     if (prev.opponent.state === 'Jumping' && curr.opponent.state === 'Idle' && 
         prev.player.state !== 'Stunned' && curr.player.state === 'Stunned') {
       audioManager.play('stomp');
+      audioManager.play('crowd_gasp'); // Player got stomped - crowd gasps
     }
 
     // Callout appeared (move executed)
@@ -221,10 +223,13 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
       const text = curr.currentCallout.text.toUpperCase();
       if (text.includes('PANCAKE')) {
         audioManager.play('pancake');
+        audioManager.play('crowd_cheer');
       } else if (text.includes('SCISSORS')) {
         audioManager.play('scissors');
+        audioManager.play('crowd_ooh');
       } else if (text.includes('GUILLOTINE')) {
         audioManager.play('guillotine');
+        audioManager.play('crowd_cheer');
       } else if (text.includes('STOMP')) {
         audioManager.play('stomp');
       } else if (text.includes('JUMP')) {
@@ -232,9 +237,10 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
       }
     }
 
-    // Pin started
+    // Pin started - crowd gets tense
     if (prev.pinningFighter === null && curr.pinningFighter !== null) {
       audioManager.play('pin_start');
+      audioManager.play('crowd_ooh');
       lastPinProgressRef.current = 0;
     }
 
@@ -247,20 +253,25 @@ export function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
       }
     }
 
-    // Fighter fell
+    // Fighter fell - crowd gasps
     if (prev.player.state !== 'Falling' && curr.player.state === 'Falling') {
       audioManager.play('fall');
+      audioManager.play('crowd_gasp');
     }
     if (prev.opponent.state !== 'Falling' && curr.opponent.state === 'Falling') {
       audioManager.play('fall');
+      audioManager.play('crowd_cheer'); // Opponent fell - crowd cheers
     }
 
-    // Game over
+    // Game over - big crowd reaction
     if (prev.scene !== 'GameOver' && curr.scene === 'GameOver' && curr.result) {
       if (curr.result.winner === 'player') {
         audioManager.play('victory');
+        audioManager.play('crowd_cheer');
+        setTimeout(() => audioManager.play('crowd_cheer'), 300);
       } else if (curr.result.winner === 'opponent') {
         audioManager.play('defeat');
+        audioManager.play('crowd_ooh');
       } else {
         // Draw - play a neutral sound
         audioManager.play('countdown');

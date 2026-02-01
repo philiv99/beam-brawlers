@@ -23,12 +23,17 @@ export type SoundEffect =
   | 'hit'
   | 'block'
   | 'fall'
-  | 'score';
+  | 'score'
+  | 'crowd_cheer'
+  | 'crowd_gasp'
+  | 'crowd_ooh';
 
 class AudioManager {
   private ctx: AudioContext | null = null;
   private enabled: boolean;
   private masterGain: GainNode | null = null;
+  private crowdInterval: number | null = null;
+  private lastCrowdSound: number = 0;
 
   constructor() {
     this.enabled = this.loadEnabledState();
@@ -149,6 +154,44 @@ class AudioManager {
       case 'score':
         this.playScore();
         break;
+      case 'crowd_cheer':
+        this.playCrowdCheer();
+        break;
+      case 'crowd_gasp':
+        this.playCrowdGasp();
+        break;
+      case 'crowd_ooh':
+        this.playCrowdOoh();
+        break;
+    }
+  }
+
+  /**
+   * Start ambient crowd noise (call during match)
+   */
+  public startCrowdAmbience(): void {
+    if (this.crowdInterval) return;
+    
+    this.crowdInterval = window.setInterval(() => {
+      if (!this.enabled || !this.ctx) return;
+      
+      // Random crowd murmur
+      const now = Date.now();
+      if (now - this.lastCrowdSound > 2000 + Math.random() * 3000) {
+        this.lastCrowdSound = now;
+        const sounds: SoundEffect[] = ['crowd_cheer', 'crowd_ooh'];
+        this.play(sounds[Math.floor(Math.random() * sounds.length)]);
+      }
+    }, 1000);
+  }
+
+  /**
+   * Stop ambient crowd noise
+   */
+  public stopCrowdAmbience(): void {
+    if (this.crowdInterval) {
+      clearInterval(this.crowdInterval);
+      this.crowdInterval = null;
     }
   }
 
@@ -379,6 +422,101 @@ class AudioManager {
     gain.connect(this.masterGain!);
     osc.start();
     osc.stop(this.ctx!.currentTime + 0.15);
+  }
+
+  private playCrowdCheer(): void {
+    if (!this.ctx || !this.masterGain) return;
+    // Crowd cheer - layered noise with rising pitch
+    const duration = 0.8;
+    
+    // Multiple "voice" oscillators at different pitches
+    const voices = [200, 250, 300, 350, 400];
+    voices.forEach((baseFreq, i) => {
+      setTimeout(() => {
+        if (!this.ctx || !this.masterGain) return;
+        const osc = this.createOscillator('sawtooth');
+        const gain = this.createGain(0.05);
+        
+        // Pitch variation
+        const freq = baseFreq + Math.random() * 50;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(freq * 1.2, this.ctx.currentTime + duration * 0.3);
+        osc.frequency.linearRampToValueAtTime(freq, this.ctx.currentTime + duration);
+        
+        gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + duration * 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain!);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+      }, i * 30);
+    });
+    
+    // Add some noise for texture
+    this.playNoiseHit(0.08, duration * 0.5);
+  }
+
+  private playCrowdGasp(): void {
+    if (!this.ctx || !this.masterGain) return;
+    // Crowd gasp - quick inhale sound effect
+    const duration = 0.4;
+    
+    // Breathy noise
+    const bufferSize = this.ctx.sampleRate * duration;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / bufferSize;
+      // Envelope: quick attack, sustain, fade
+      const env = t < 0.1 ? t * 10 : (1 - (t - 0.1) / 0.9);
+      data[i] = (Math.random() * 2 - 1) * env * 0.3;
+    }
+    
+    const source = this.ctx.createBufferSource();
+    source.buffer = buffer;
+    
+    // Filter for "breathy" quality
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 800;
+    filter.Q.value = 2;
+    
+    const gain = this.createGain(0.15);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+    source.start();
+  }
+
+  private playCrowdOoh(): void {
+    if (!this.ctx || !this.masterGain) return;
+    // Crowd "ooh" - descending tone suggesting awe/concern
+    const duration = 0.6;
+    
+    const voices = [280, 320, 350];
+    voices.forEach((baseFreq, i) => {
+      setTimeout(() => {
+        if (!this.ctx || !this.masterGain) return;
+        const osc = this.createOscillator('sine');
+        const gain = this.createGain(0.06);
+        
+        // Descending "ooh" pitch
+        osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.7, this.ctx.currentTime + duration);
+        
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + duration * 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain!);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+      }, i * 20 + Math.random() * 30);
+    });
   }
 
   // ==========================================================================

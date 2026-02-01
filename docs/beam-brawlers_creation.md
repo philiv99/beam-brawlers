@@ -102,6 +102,17 @@
 - [x] Display names in renderer and Game Over screen
 - [x] Update tests (84 tests total passing)
 
+### Phase 9: Animated Crowd & Fighter Animations
+- [x] Add animated crowd background (5 rows, ~175 members)
+- [x] Crowd members bob and wave arms based on excitement level
+- [x] Add nematodes (~15% of crowd) with wiggly animation
+- [x] Add crowd voice bubbles during exciting moments
+- [x] Add crowd sound effects (cheers, gasps, oohs)
+- [x] Add fall animation with tumbling rotation and flailing limbs
+- [x] Add jumping pose with arms spread and motion blur
+- [x] Add stunned pose with wobble and spiral dizzy eyes
+- [x] Add motion lines and "AAAH!" text for falls
+
 ---
 
 ## Technical Decisions
@@ -159,3 +170,13 @@
 - Added Web Audio synthesis-based sound effects (no external files)
 - Fighter names are now Frank Zappa song titles (adds personality and humor)
 - Sound toggle persisted to localStorage for user preference
+
+### 2026-02-01: Crowd & Animations Added
+- Added animated crowd of ~175 members across 5 rows behind the beam
+- ~15% of crowd are nematodes (wiggly worms) for surreal humor
+- Crowd excitement level tied to game state (grappling, pins, falls)
+- Crowd members bob, wave arms, and show open mouths when cheering
+- Voice bubble exclamations ("GO!", "WOO!", "SLAM!") float up during action
+- Enhanced fighter animations: jumping pose, falling tumble, stunned wobble
+- Fall animation includes rotation, flailing limbs, and "AAAH!" text
+- Crowd reacts with cheers/gasps to major events (stomps, falls, victories)
